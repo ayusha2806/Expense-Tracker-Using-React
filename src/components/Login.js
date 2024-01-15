@@ -100,6 +100,8 @@ function Login() {
                 </button>
                 <p className="mt-3 text-center">Don't have an account?</p>
                 <p className="text-center">
+                  <Link to="/password">Forget Password</Link>
+                  <br/>
                   <Link to="/">Sign up</Link>
                 </p>
               </div>
