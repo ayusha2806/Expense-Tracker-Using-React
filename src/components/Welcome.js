@@ -1,8 +1,10 @@
 // Welcome.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Welcome() {
+  const navigate = useNavigate();
   const [verificationSent, setVerificationSent] = useState(false);
   const [error, setError] = useState(null);
 
@@ -38,8 +40,22 @@ function Welcome() {
     }
   };
 
+  const handleLogout = () => {
+    // Clear the idToken from local storage
+    localStorage.removeItem('token');
+    
+    // Navigate the user to the login page
+    navigate('/login');
+  };
+
   return (
     <>
+      <div className="mb-3">
+        {/* Logout button with Bootstrap classes */}
+        <button onClick={handleLogout} className="btn btn-outline-primary">
+          Logout
+        </button>
+      </div>
       <p style={{ display: 'inline' }}>Welcome To Expense Tracker!!</p>
       {!verificationSent && (
         <p style={{ display: 'inline', marginLeft: '150px' }}>
