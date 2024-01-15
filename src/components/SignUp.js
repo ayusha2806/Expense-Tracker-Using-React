@@ -1,9 +1,9 @@
-// SignUp.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function SignUp() {
+  const navigate = useNavigate();
   const [values, setValues] = useState({
     email: '',
     pass: '',
@@ -19,7 +19,7 @@ function SignUp() {
     }
 
     try {
-      const response = await fetch(
+      const userCredential = await fetch(
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCz5GQw9rpsQ_WeKR1Qj0-CkRUvQUEmogI',
         {
           method: 'POST',
@@ -30,11 +30,13 @@ function SignUp() {
           }),
           headers: { 'Content-Type': 'application/json' },
         }
-      );
+      ).then((response) => response.json());
 
-      if (response.ok) {
-        const userCredential = await response.json();
+      if (userCredential) {
         console.log('User signed up:', userCredential);
+
+        // Use navigate instead of history.push
+        navigate('/login');
 
         setValues({
           email: '',
@@ -42,8 +44,7 @@ function SignUp() {
           conf: '',
         });
       } else {
-        const errorData = await response.json();
-        console.log('Error signing up:', errorData.error.message);
+        console.log('Error signing up.');
       }
     } catch (error) {
       console.log('Error signing up:', error.message);
