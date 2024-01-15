@@ -1,24 +1,23 @@
+// App.js
 import React from 'react';
-
-import './App.css';
-import {BrowserRouter as Router,Routes,Route} from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import Welcome from './components/Welcome';
-
-
+import Profile from './components/Profile';
+import Complete from './components/Complete';
 
 function App() {
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route path='/login' element={<Login />}/>
-          <Route path='/' element={<SignUp />}/>
-          <Route path='/welcome' element={<Welcome />}/>
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/complete" element={<Complete />} />
+      </Routes>
+    </Router>
   );
 }
 
