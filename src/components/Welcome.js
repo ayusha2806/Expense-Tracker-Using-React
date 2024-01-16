@@ -48,10 +48,14 @@ function Welcome() {
     navigate('/login');
   };
 
+  function submitHandle(){
+    navigate('/expense')
+  }
+
   return (
     <>
       <div className="mb-3">
-        {/* Logout button with Bootstrap classes */}
+        {/* Logout button */}
         <button onClick={handleLogout} className="btn btn-outline-primary">
           Logout
         </button>
@@ -67,6 +71,13 @@ function Welcome() {
       )}
       {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
       <hr />
+      <br />
+      <br />
+      <div className="d-flex justify-content-center">
+        <button onClick={submitHandle} className="btn btn-primary btn-lg">
+          Explore Expense Tracker
+        </button>
+      </div>
     </>
   );
 }

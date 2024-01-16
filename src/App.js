@@ -7,6 +7,7 @@ import Welcome from './components/Welcome';
 import Profile from './components/Profile';
 import Complete from './components/Complete';
 import Password from './components/Password';
+import Expense from './components/Expense';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/complete" element={<Complete />} />
         <Route path='/password' element={<Password/>} />
+        <Route path='/expense' element={<Expense/>}/>
       </Routes>
     </Router>
   );
