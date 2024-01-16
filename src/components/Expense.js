@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Expense() {
   const [expenseList, setExpenseList] = useState([]);
@@ -6,9 +6,38 @@ function Expense() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
 
+  useEffect(() => {
+    // Fetch existing data from Firebase when the component mounts
+    fetchDataFromFirebase();
+  }, []); // Empty dependency array ensures that this effect runs only once when the component mounts
+
+  const fetchDataFromFirebase = async () => {
+    try {
+      const apiKey = 'https://react-https-45286-default-rtdb.firebaseio.com/expenses.json'; // Replace with your actual Firebase API key
+      const response = await fetch(`https://react-https-45286-default-rtdb.firebaseio.com/expenses.json?apiKey=${apiKey}`);
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch data from Firebase');
+      }
+  
+      const data = await response.json();
+  
+      if (data) {
+        // If there is data in Firebase, update expenseList with that data
+        const expensesArray = Object.keys(data).map((key) => ({
+          id: key,
+          ...data[key],
+        }));
+        setExpenseList(expensesArray);
+      }
+    } catch (error) {
+      console.error('Error fetching data from Firebase:', error.message);
+    }
+  };
+  
+
   const handleAddExpense = () => {
     const newExpense = {
-      id: new Date().getTime(), // Unique ID for each expense (using timestamp)
       moneySpent,
       description,
       category,
@@ -21,7 +50,31 @@ function Expense() {
     setMoneySpent('');
     setDescription('');
     setCategory('');
+
+    // Post data to Firebase
+    postDataToFirebase(newExpense);
   };
+
+  const postDataToFirebase = async (newExpense) => {
+    try {
+      const response = await fetch('https://react-https-45286-default-rtdb.firebaseio.com/expenses.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newExpense),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post data to Firebase');
+      }
+
+      console.log('Data posted to Firebase successfully');
+    } catch (error) {
+      console.error('Error posting data to Firebase:', error.message);
+    }
+  };
+
 
   return (
     <div className="container mt-4">

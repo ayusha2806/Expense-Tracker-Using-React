@@ -26,6 +26,11 @@
       "react-app/jest"
     ]
   },
+    "rules": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
   "browserslist": {
     "production": [
       ">0.2%",
