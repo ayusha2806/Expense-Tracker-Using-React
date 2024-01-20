@@ -2,15 +2,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useSelector, useDispatch} from 'react-redux';
+import { logout } from '../store/Store';
 
 function Welcome() {
+  const dispatch = useDispatch();
+  const idToken = useSelector((state)=>state.auth.token)
   const navigate = useNavigate();
   const [verificationSent, setVerificationSent] = useState(false);
   const [error, setError] = useState(null);
 
   const sendVerificationEmail = async () => {
     try {
-      const idToken = localStorage.getItem('token');
+      // const idToken = localStorage.getItem('token');
       const response = await fetch(
         `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyCz5GQw9rpsQ_WeKR1Qj0-CkRUvQUEmogI`,
         {
@@ -41,8 +45,10 @@ function Welcome() {
   };
 
   const handleLogout = () => {
+    dispatch(logout());
     // Clear the idToken from local storage
-    localStorage.removeItem('token');
+    // localStorage.removeItem('token');
+
     
     // Navigate the user to the login page
     navigate('/login');

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch,useSelector} from "react-redux";
+import { setExpenses } from "../store/Store";
 
 function Expense() {
-  const [expenseList, setExpenseList] = useState([]);
+  const dispatch = useDispatch();
+  const expenses = useSelector((state)=>state.expenses.expenses)
+  const [expenseList, setExpenseList] = useState();
   const [moneySpent, setMoneySpent] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [editingExpenseId, setEditingExpenseId] = useState(null);
+  const [showPremiumButton, setShowPremiumButton] = useState(false);
+
 
   useEffect(() => {
     // Fetch existing data from Firebase when the component mounts
@@ -32,12 +38,18 @@ function Expense() {
           id: key,
           ...data[key],
         }));
-        setExpenseList(expensesArray);
+        // setExpenseList(expensesArray);
+        dispatch(setExpenses(expensesArray))
       }
     } catch (error) {
       console.error("Error fetching data from Firebase:", error.message);
     }
   };
+
+  useEffect(() => {
+    const currentExpense = parseFloat(moneySpent) || 0;
+    setShowPremiumButton(currentExpense > 10000);
+  }, [moneySpent]);
 
   const handleAddExpense = () => {
     const newExpense = {
@@ -46,8 +58,24 @@ function Expense() {
       category,
     };
 
-    // Update expenseList with the new expense
-    setExpenseList((prevExpenseList) => [...prevExpenseList, newExpense]);
+    const totalExpenses = expenses.reduce(
+      (total, expense) => total + parseFloat(expense.moneySpent),
+      parseFloat(newExpense.moneySpent)
+    );
+  
+    // Check if the total expenses exceed 10000
+    if (totalExpenses > 10000) {
+      const confirmPremium = window.confirm(
+        "Total expenses exceed 10000. Do you want to activate Premium membership?"
+      );
+  
+      if (!confirmPremium) {
+        // User declined to activate Premium, don't add the expense
+        return;
+      }
+    }
+  
+    dispatch(setExpenses([...expenses, newExpense]));
 
     // Clear input fields
     setMoneySpent("");
@@ -95,9 +123,11 @@ function Expense() {
       }
 
       // Remove the expense from the local state
-      setExpenseList((prevExpenseList) =>
-        prevExpenseList.filter((expense) => expense.id !== id)
-      );
+      dispatch(setExpenses(expenses.filter((expense) => expense.id !== id)));
+
+    //   dispatch(setExpenses((prevExpenses) =>
+    //   prevExpenses.filter((expense) => expense.id !== id)
+    // ));
 
       console.log("Expense successfully deleted");
     } catch (error) {
@@ -110,10 +140,12 @@ function Expense() {
     setEditingExpenseId(id);
 
     // Find the expense to be edited and set its values in the input fields
-    const editedExpense = expenseList.find((expense) => expense.id === id);
-    setMoneySpent(editedExpense.moneySpent);
-    setDescription(editedExpense.description);
-    setCategory(editedExpense.category);
+    const editedExpense = expenses.find((expense) => expense.id === id);
+    if (editedExpense) {
+      setMoneySpent(editedExpense.moneySpent || "");
+      setDescription(editedExpense.description || "");
+      setCategory(editedExpense.category || "");
+    }
   };
 
   const handleUpdateExpense = async () => {
@@ -140,11 +172,13 @@ function Expense() {
       }
 
       // Update the local state with the edited expense
-      setExpenseList((prevExpenseList) =>
-        prevExpenseList.map((expense) =>
-          expense.id === editingExpenseId
-            ? { id: editingExpenseId, ...updatedExpense }
-            : expense
+      dispatch(
+        setExpenses(
+          expenses.map((expense) =>
+            expense.id === editingExpenseId
+              ? { id: editingExpenseId, ...updatedExpense }
+              : expense
+          )
         )
       );
 
@@ -231,8 +265,8 @@ function Expense() {
       <div className="p-3 border rounded">
         <h2 className="mb-3">Added Expenses</h2>
         <ul className="list-group">
-          {expenseList.map((expense) => (
-            <li key={expense.id} className="list-group-item">
+          {expenses.map((expense,id) => (
+            <li key={id} className="list-group-item">
               <strong>Money Spent:</strong> {expense.moneySpent},{" "}
               <strong>Description:</strong> {expense.description},{" "}
               <strong>Category:</strong> {expense.category}
@@ -253,6 +287,14 @@ function Expense() {
             </li>
           ))}
         </ul>
+        {showPremiumButton && (
+          <button
+            className="btn btn-primary mt-3"
+            onClick={() => alert("Activate Premium!")}
+          >
+            Activate Premium
+          </button>
+        )}
       </div>
     </div>
   );

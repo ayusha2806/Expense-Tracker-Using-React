@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 const Profile = () => {
+  const idToken = useSelector((state)=>state.auth.token)
   const [fullName, setFullName] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [error, setError] = useState(null);
@@ -11,7 +13,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const idToken = localStorage.getItem("token");
+        // const idToken = localStorage.getItem("token");
         const response = await fetch(
           `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyCz5GQw9rpsQ_WeKR1Qj0-CkRUvQUEmogI`,
           {
@@ -46,7 +48,7 @@ const Profile = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      const idToken = localStorage.getItem("token");
+      // const idToken = localStorage.getItem("token");
       const obj = {
         idToken: idToken,
         displayName: fullName,

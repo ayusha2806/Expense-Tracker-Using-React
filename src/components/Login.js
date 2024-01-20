@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../store/Store';
 
 function Login() {
+  const dispatch = useDispatch();
+  const storedToken = useSelector((state)=>state.auth.token)
   const navigate = useNavigate();
   const [values, setValues] = useState({
     email: '',
@@ -11,7 +15,8 @@ function Login() {
 
   useEffect(() => {
     // Check if a token exists in localStorage on page load
-    const storedToken = localStorage.getItem('token');
+    // const storedToken = localStorage.getItem('token');
+
     if (storedToken) {
       // Redirect to the Welcome page if the user is already logged in
       navigate('/welcome');
@@ -38,9 +43,10 @@ function Login() {
       if (response.ok) {
         const userCredential = await response.json();
         console.log('User logged in:', userCredential);
-
+        const token = userCredential.idToken
         // Store the token in localStorage
-        localStorage.setItem('token', userCredential.idToken);
+        // localStorage.setItem('token', userCredential.idToken);
+        dispatch(login({token}));
 
         setValues({
           email: '',
