@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* index.css */
+.dark-theme {
+  background-color: #333;
+  color: #fff;
+  /* Add more styles for dark theme as needed */
+}

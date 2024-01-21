@@ -1,17 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch,useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setExpenses } from "../store/Store";
+import { toggleTheme } from "../store/Store";
 
 function Expense() {
   const dispatch = useDispatch();
-  const expenses = useSelector((state)=>state.expenses.expenses)
-  const [expenseList, setExpenseList] = useState();
+  const expenses = useSelector((state) => state.expenses.expenses);
+  const isDarkTheme = useSelector((state) => state.theme.isDarkTheme);
+  // const [expenseList, setExpenseList] = useState();
   const [moneySpent, setMoneySpent] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [showPremiumButton, setShowPremiumButton] = useState(false);
 
+  const handleDownloadCSV = () => {
+    // Convert expenses to CSV format
+    const csvData = expenses
+      .map((expense) =>
+        Object.values(expense)
+          .map((value) => `"${value}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    // Create a Blob containing the CSV data
+    const blob = new Blob([csvData], { type: "text/csv" });
+
+    // Create a link element to trigger the download
+    const a = document.createElement("a");
+    a.href = window.URL.createObjectURL(blob);
+    a.download = "expenses.csv";
+
+    // Append the link to the document and simulate a click
+    document.body.appendChild(a);
+    a.click();
+
+    // Remove the link from the document
+    document.body.removeChild(a);
+  };
 
   useEffect(() => {
     // Fetch existing data from Firebase when the component mounts
@@ -39,7 +66,7 @@ function Expense() {
           ...data[key],
         }));
         // setExpenseList(expensesArray);
-        dispatch(setExpenses(expensesArray))
+        dispatch(setExpenses(expensesArray));
       }
     } catch (error) {
       console.error("Error fetching data from Firebase:", error.message);
@@ -62,19 +89,19 @@ function Expense() {
       (total, expense) => total + parseFloat(expense.moneySpent),
       parseFloat(newExpense.moneySpent)
     );
-  
+
     // Check if the total expenses exceed 10000
     if (totalExpenses > 10000) {
       const confirmPremium = window.confirm(
         "Total expenses exceed 10000. Do you want to activate Premium membership?"
       );
-  
+
       if (!confirmPremium) {
         // User declined to activate Premium, don't add the expense
         return;
       }
     }
-  
+
     dispatch(setExpenses([...expenses, newExpense]));
 
     // Clear input fields
@@ -125,9 +152,9 @@ function Expense() {
       // Remove the expense from the local state
       dispatch(setExpenses(expenses.filter((expense) => expense.id !== id)));
 
-    //   dispatch(setExpenses((prevExpenses) =>
-    //   prevExpenses.filter((expense) => expense.id !== id)
-    // ));
+      //   dispatch(setExpenses((prevExpenses) =>
+      //   prevExpenses.filter((expense) => expense.id !== id)
+      // ));
 
       console.log("Expense successfully deleted");
     } catch (error) {
@@ -194,107 +221,132 @@ function Expense() {
     }
   };
 
+  const handleToggleTheme = () => {
+    dispatch(toggleTheme());
+  };
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-theme", isDarkTheme);
+  }, [isDarkTheme]);
+
   return (
-    <div className="container mt-4">
-      {/* Form for entering daily expenses */}
-      <div className="mb-4 p-3 border rounded">
-        <h2 className="text-center mb-3">Enter Daily Expenses</h2>
-        <form>
-          <div className="mb-3">
-            <label htmlFor="moneySpent" className="form-label">
-              Money Spent
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              id="moneySpent"
-              value={moneySpent}
-              onChange={(e) => setMoneySpent(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="description" className="form-label">
-              Description
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="category" className="form-label">
-              Category
-            </label>
-            <select
-              className="form-control"
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="">Select Category</option>
-              <option value="Food">Food</option>
-              <option value="Petrol">Petrol</option>
-              <option value="Salary">Salary</option>
-              {/* Add more categories as needed */}
-            </select>
-          </div>
-          {editingExpenseId ? (
+    <div className={`container mt-4 ${isDarkTheme ? "dark-theme" : ""}`}>
+      <button
+        type="button"
+        className="btn btn-info btn-sm"
+        onClick={handleToggleTheme}
+      >
+        {isDarkTheme ? "Light Theme" : "Dark Theme"}
+      </button>
+
+      <div className="container mt-4">
+        {/* Form for entering daily expenses */}
+        <div className="mb-4 p-3 border rounded">
+          <h2 className="text-center mb-3">Enter Daily Expenses</h2>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="moneySpent" className="form-label">
+                Money Spent
+              </label>
+              <input
+                type="number"
+                className="form-control"
+                id="moneySpent"
+                value={moneySpent}
+                onChange={(e) => setMoneySpent(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="description" className="form-label">
+                Description
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="category" className="form-label">
+                Category
+              </label>
+              <select
+                className="form-control"
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Select Category</option>
+                <option value="Food">Food</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Salary">Salary</option>
+                {/* Add more categories as needed */}
+              </select>
+            </div>
+            {editingExpenseId ? (
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                onClick={handleUpdateExpense}
+              >
+                Update Expense
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleAddExpense}
+              >
+                Add Expense
+              </button>
+            )}
+          </form>
+        </div>
+
+        {/* Display added expenses */}
+        <div className="p-3 border rounded">
+          <h2 className="mb-3">Added Expenses</h2>
+          <button
+            type="button"
+            className="btn btn-success btn-sm"
+            onClick={handleDownloadCSV}
+          >
+            Download List
+          </button>
+          <ul className="list-group">
+            {expenses.map((expense, id) => (
+              <li key={id} className="list-group-item">
+                <strong>Money Spent:</strong> {expense.moneySpent},{" "}
+                <strong>Description:</strong> {expense.description},{" "}
+                <strong>Category:</strong> {expense.category}
+                <button
+                  type="button"
+                  className="btn btn-warning btn-sm mx-2"
+                  onClick={() => handleEditExpense(expense.id)}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDeleteExpense(expense.id)}
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+          {showPremiumButton && (
             <button
-              type="button"
-              className="btn btn-success btn-sm"
-              onClick={handleUpdateExpense}
+              className="btn btn-primary mt-3"
+              onClick={() => alert("Activate Premium!")}
             >
-              Update Expense
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={handleAddExpense}
-            >
-              Add Expense
+              Activate Premium
             </button>
           )}
-        </form>
-      </div>
-
-      {/* Display added expenses */}
-      <div className="p-3 border rounded">
-        <h2 className="mb-3">Added Expenses</h2>
-        <ul className="list-group">
-          {expenses.map((expense,id) => (
-            <li key={id} className="list-group-item">
-              <strong>Money Spent:</strong> {expense.moneySpent},{" "}
-              <strong>Description:</strong> {expense.description},{" "}
-              <strong>Category:</strong> {expense.category}
-              <button
-                type="button"
-                className="btn btn-warning btn-sm mx-2"
-                onClick={() => handleEditExpense(expense.id)}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger btn-sm"
-                onClick={() => handleDeleteExpense(expense.id)}
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-        {showPremiumButton && (
-          <button
-            className="btn btn-primary mt-3"
-            onClick={() => alert("Activate Premium!")}
-          >
-            Activate Premium
-          </button>
-        )}
+        </div>
       </div>
     </div>
   );
